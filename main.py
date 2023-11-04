@@ -65,12 +65,26 @@ def generate_movie_release_chart(release_years):
 
 @app.route('/draw-chart')
 def graph_endpoint():
+    # Check if the SQLite database has data before attempting to draw the chart.
+    # The function database_has_data() should return a boolean indicating if data is present.
     if not database_has_data():
+        # If there is no data, return a HTTP 400 response with an error message.
         return 'No data available in SQLite database.', 400
 
+    # Establish a connection to the SQLite database that contains the movies data.
     conn = sqlite3.connect('movies.db')
+
+    # Query the database to retrieve only the 'release_year' column from the 'movies' table
+    # and read the result into a pandas DataFrame.
     df = pd.read_sql_query("SELECT release_year FROM movies", conn)
+
+    # Call the function generate_movie_release_chart with the list of release years
+    # to create and save the bar chart image.
+    # The 'release_year' column is cast to integers to ensure proper handling by the chart function.
     generate_movie_release_chart(df['release_year'].astype(int).tolist())
+
+    # After the chart has been generated, send it back as a file response with MIME type image/png.
+    # The user will receive the chart as a downloadable or viewable PNG image.
     return send_file('chart.png', mimetype='image/png')
 
 @app.route('/load-data')
@@ -103,24 +117,33 @@ def load_data_endpoint():
 
 @app.route('/export-data')
 def export_data():
-    # Check if the SQLite database has data before attempting to draw the chart.
-    # The function database_has_data() should return a boolean indicating if data is present.
+    # Endpoint to export data from the SQLite database to a CSV file.
+
+    # First, we check if there's data in the database to export.
+    # The database_has_data() function should check for the existence of data and return True or False.
     if not database_has_data():
-        # If there is no data, return a HTTP 400 response with an error message.
+        # If the check returns False (no data), we send a 400 HTTP response with an error message.
         return 'No data available in SQLite database.', 400
 
-    # Establish a connection to the SQLite database that contains the movies data.
+    # If there is data, establish a connection to the SQLite database.
     conn = sqlite3.connect('movies.db')
 
-    # Query the database to retrieve only the 'release_year' column from the 'movies' table
-    # and read the result into a pandas DataFrame.
-    df = pd.read_sql_query("SELECT release_year FROM movies", conn)
+    # Execute a SQL query to select the 'title' and 'release_year' of all movies in the database.
+    # The result is read into a pandas DataFrame for easy manipulation and CSV conversion.
+    df = pd.read_sql_query("SELECT title, release_year FROM movies", conn)
 
-    # Call the function generate_movie_release_chart with the list of release years
-    # to create and save the bar chart image.
-    # The 'release_year' column is cast to integers to ensure proper handling by the chart function.
-    generate_movie_release_chart(df['release_year'].astype(int).tolist())
+    # Convert the DataFrame to a CSV format. Index=False means we don't include the DataFrame index in the CSV.
+    csv_data = df.to_csv(index=False)
 
-    # After the chart has been generated, send it back as a file response with MIME type image/png.
-    # The user will receive the chart as a downloadable or viewable PNG image.
-    return send_file('chart.png', mimetype='image/png')
+    # Create an HTTP response object with the CSV data as the content.
+    response = make_response(csv_data)
+
+    # Set the content type of the response to 'text/csv' which is appropriate for CSV files.
+    response.headers['Content-Type'] = 'text/csv'
+
+    # Configure the Content-Disposition header so that the browser prompts the user to
+    # download the file as 'movies.csv' instead of displaying it.
+    response.headers['Content-Disposition'] = 'attachment; filename=movies.csv'
+
+    # Send the response back to the client, triggering the download of the movies.csv file.
+    return response
