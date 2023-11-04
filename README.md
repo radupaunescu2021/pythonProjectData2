@@ -26,7 +26,7 @@ Execute the Pytest command to run the tests:
     ```shell
     pytest
 
-3. Application Endpoints
+### Application Endpoints
 
 The application provides the following endpoints:
 
