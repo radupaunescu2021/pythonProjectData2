@@ -4,6 +4,28 @@ This application is a Flask web service that provides endpoints for loading movi
 
 ## Getting Started
 
+
+### Installing
+This app uses python 3.9
+1. Clone the repository :
+
+git clone https://github.com/radupaunescu2021/PythonProjectData2.git
+
+Navigate to the project directory:
+cd PythonProjectData2
+
+Create virtual environment 
+
+python3.9 -m venv myenv
+source myenv/bin/activate
+
+## Requirements
+
+Before running the application, you'll need to install the required Python packages. You can install all the necessary dependencies with the following command:
+
+    pip install flask pandas matplotlib pysqlite3
+    pip install pytest pytest-flask
+
 ### Running the Flask Application
 
 To get the Flask application up and running, follow these steps:
