@@ -17,7 +17,7 @@ Open a web browser and navigate to http://localhost:5000 to access the applicati
 
 2. Running Tests with Pytest
 
-3. To execute the tests for the Flask application using Pytest, follow these steps:
+To execute the tests for the Flask application using Pytest, follow these steps:
 
 Ensure you have installed all the project dependencies as mentioned in the setup section.
 Navigate to the project directory where test_app.py is located.
@@ -34,10 +34,13 @@ GET /load-data
 
 Loads movie data from a CSV file into the SQLite database.
 Usage: Invoke this endpoint once to populate the database before using other endpoints.
+
 GET /draw-chart
 
 Generates a bar chart of movies released per year.
 Usage: Access this endpoint after loading data to retrieve a PNG image of the movie release chart.
+
+
 GET /export-data
 
 Downloads movie release data in CSV format.
