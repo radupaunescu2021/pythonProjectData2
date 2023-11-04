@@ -1,7 +1,5 @@
 import sqlite3
 from collections import Counter
-from urllib import response
-
 import matplotlib
 import pandas as pd
 from matplotlib import pyplot as plt
@@ -10,8 +8,6 @@ matplotlib.use('Agg')
 
 from flask import Flask, send_file, make_response
 
-import csv
-import io
 
 app = Flask(__name__)
 
@@ -33,22 +29,37 @@ def database_has_data():
 
 
 def generate_movie_release_chart(release_years):
-    # Count the number of movies released each year
+    # Count the number of movies released each year using a Counter collection
+    # which will store each year as a key and the number of releases as its value
     year_count = Counter(release_years)
-    years = list(year_count.keys())
-    counts = list(year_count.values())
-    # Prepare data for the bar chart
-    # Generate the bar chart
-    plt.bar(years, counts)
-    # Customize the chart
-    plt.xlabel('Release Year')
-    plt.ylabel('Number of Movies')
-    plt.title('Movies Released Per Year')
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig('chart.png')
-    plt.close()
 
+    # Extract the years from the counter which are the keys of the counter dictionary
+    # These will serve as the x-axis labels for the bar chart
+    years = list(year_count.keys())
+
+    # Extract the counts from the counter which are the values of the counter dictionary
+    # These will represent the height of the bars, i.e., the number of releases per year
+    counts = list(year_count.values())
+
+    # Generate the bar chart using matplotlib with years on the x-axis and counts on the y-axis
+    plt.bar(years, counts)
+
+    # Customize the chart by adding labels and a title
+    plt.xlabel('Release Year')  # Label for the x-axis
+    plt.ylabel('Number of Movies')  # Label for the y-axis
+    plt.title('Movies Released Per Year')  # Chart title
+
+    # Improve readability of the x-axis labels by rotating them 45 degrees
+    plt.xticks(rotation=45)
+
+    # Adjust the layout to ensure the chart is displayed nicely without any clipping
+    plt.tight_layout()
+
+    # Save the chart as a PNG image in the current directory
+    plt.savefig('chart.png')
+
+    # Close the matplotlib plot to free up memory resources
+    plt.close()
 
 
 
@@ -92,14 +103,24 @@ def load_data_endpoint():
 
 @app.route('/export-data')
 def export_data():
+    # Check if the SQLite database has data before attempting to draw the chart.
+    # The function database_has_data() should return a boolean indicating if data is present.
     if not database_has_data():
+        # If there is no data, return a HTTP 400 response with an error message.
         return 'No data available in SQLite database.', 400
 
+    # Establish a connection to the SQLite database that contains the movies data.
     conn = sqlite3.connect('movies.db')
-    df = pd.read_sql_query("SELECT title, release_year FROM movies", conn)
-    csv_data = df.to_csv(index=False)
 
-    response = make_response(csv_data)
-    response.headers['Content-Type'] = 'text/csv'
-    response.headers['Content-Disposition'] = 'attachment; filename=movies.csv'
-    return response
+    # Query the database to retrieve only the 'release_year' column from the 'movies' table
+    # and read the result into a pandas DataFrame.
+    df = pd.read_sql_query("SELECT release_year FROM movies", conn)
+
+    # Call the function generate_movie_release_chart with the list of release years
+    # to create and save the bar chart image.
+    # The 'release_year' column is cast to integers to ensure proper handling by the chart function.
+    generate_movie_release_chart(df['release_year'].astype(int).tolist())
+
+    # After the chart has been generated, send it back as a file response with MIME type image/png.
+    # The user will receive the chart as a downloadable or viewable PNG image.
+    return send_file('chart.png', mimetype='image/png')
