@@ -9,15 +9,16 @@ This application is a Flask web service that provides endpoints for loading movi
 This app uses python 3.9
 1. Clone the repository :
 
-git clone https://github.com/radupaunescu2021/PythonProjectData2.git
+git clone https://github.com/radupaunescu2021/pythonProjectData2.git
 
 Navigate to the project directory:
-cd PythonProjectData2
+    
+    cd pythonProjectData2
 
 Create virtual environment 
 
-python3.9 -m venv myenv
-source myenv/bin/activate
+    python3.9 -m venv myenv
+    source myenv/bin/activate
 
 ## Requirements
 
